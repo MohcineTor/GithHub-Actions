@@ -1,0 +1,112 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: Python application Flask CI/CD 
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  
+  workflow_dispatch:
+    inputs:
+      python-version:
+        type: choice
+        description: "Select version"
+        options:
+          - "3.9"
+          - "3.10"
+          - "3.11"
+        required: true
+  
+permissions:
+  contents: read
+
+env:
+  REGISTRY_USER: ${{ vars.DOCKER_USERNAME }}
+  REGISTRY_PASS: ${{ secrets.DOCKER_PASSWORD }}
+  IMAGE_NAME: ${{ vars.IMAGE_NAME }}
+
+
+#This will ensure that your workflow only runs on the latest commit for the main branch and will cancel any in-progress workflows running for the same branch or pull request.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
+
+jobs: 
+  test-and-build-ubuntu:
+      runs-on: ubuntu-20.04
+      steps: 
+        - name: Checkout Code 
+          uses: actions/checkout@v3
+
+        - name: Sey up python ${{ inputs.python-version }}
+          uses: actions/setup-python@v3
+          with:
+            python-version: ${{ inputs.python-version || "3.9"}}
+        
+        - name: Get commit message
+          run: echo "::set-output name=commit_message::$(git log --format=%B -n 1 ${{ github.sha }})"
+
+        - name: Determine version increment
+          id: version_increment
+          run: |
+            if [[ "${{ steps.commit_message.outputs.commit_message }}" == "feat:"* ]]; then
+              echo "::set-output name=increment::minor"
+            elif [[ "${{ steps.commit_message.outputs.commit_message }}" == "fix:"* ]]; then
+              echo "::set-output name=increment::patch"
+            elif [[ "${{ steps.commit_message.outputs.commit_message }}" == "breaking:"* ]]; then
+              echo "::set-output name=increment::major"
+            else
+              echo "::set-output name=increment::patch"
+            fi
+
+        - name: Get next version
+          uses: reecetech/version-increment@2023.4.1
+          id: version
+          with:
+            scheme: semver
+            increment: ${{ steps.version_increment.outputs.increment }}
+
+        - name: Set output variable 
+          run: echo "VERSION=${{ steps.version.outputs.version }}" >> $GITHUB_ENV
+
+        - name: Install Make 
+          run: sudo apt-get update && sudo apt-get install make 
+
+        - name: Create Env Virtual
+          run: make venv
+
+        - name: Run Testes
+          run: make test
+
+        - uses: mr-smithers-excellent/docker-build-push@v6
+          name: Build & push Docker image
+          with:
+            image: ${{ env.IMAGE_NAME }}
+            tags: $VERSION
+            registry: docker.io
+            username: ${{ env.REGISTRY_USER }}
+            password: ${{ env.REGISTRY_PASS }}
+
+        - name: Scan image
+          uses: anchore/scan-action@v3
+          with:
+            image: "${{ env.REGISTRY_USER }}/${{ env.IMAGE_NAME }}:$VERSION"
+
+        - name: Deploy to server
+          run: |
+            echo "${{ env.REGISTRY_PASS }}" | docker login -u "${{ env.REGISTRY_USER }}" --password-stdin
+            docker ps -aq | xargs docker stop || true
+            docker ps -aq | xargs docker rm || true
+            docker run -d -p 5000:5000 "${{ env.IMAGE_NAME }}:$VERSION"
+            docker ps 
+
+        # - name: 🔎 Check IP
+        #   run: |
+        #     PUBLIC_IP=$(curl -s https://api.ipify.org)
+        #     echo "Public IP address: $PUBLIC_IP"
+
+
+         
