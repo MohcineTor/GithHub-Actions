@@ -38,7 +38,7 @@ jobs:
   test-and-build-ubuntu:
       runs-on: ubuntu-20.04
       env:
-        PYTHON_VERSION: ${{ github.event.inputs.python-version || "3.9" }}
+        PYTHON_VERSION: ${{ github.event.inputs.python-version || '3.9' }}
       steps: 
         - name: Checkout Code 
           uses: actions/checkout@v3
