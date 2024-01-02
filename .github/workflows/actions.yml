@@ -37,6 +37,8 @@ concurrency:
 jobs: 
   test-and-build-ubuntu:
       runs-on: ubuntu-20.04
+      env:
+        PYTHON_VERSION: ${{ }}
       steps: 
         - name: Checkout Code 
           uses: actions/checkout@v3
@@ -44,7 +46,7 @@ jobs:
         - name: Sey up python ${{ inputs.python-version }}
           uses: actions/setup-python@v3
           with:
-            python-version: ${{ inputs.python-version || "3.9"}}
+            python-version: ${{ github.event.inputs.python-version || "3.9"}}
         
         - name: Get commit message
           run: echo "::set-output name=commit_message::$(git log --format=%B -n 1 ${{ github.sha }})"
