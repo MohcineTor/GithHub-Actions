@@ -76,12 +76,9 @@ jobs:
 
         - name: Install Make 
           run: sudo apt-get update && sudo apt-get install make 
-
-        - name: Create Env Virtual
-            run: make venv && make test
-
-        # - name: Run Testes
-        #   run: make test
+          
+        - name: Create env Virtual && Run Testes 
+          run: make venv && make test
 
         - uses: mr-smithers-excellent/docker-build-push@v6
           name: Build & push Docker image
