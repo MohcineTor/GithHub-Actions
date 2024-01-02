@@ -37,8 +37,6 @@ concurrency:
 jobs: 
   test-and-build-ubuntu:
       runs-on: ubuntu-20.04
-      env:
-        PYTHON_VERSION: ${{ }}
       steps: 
         - name: Checkout Code 
           uses: actions/checkout@v3
