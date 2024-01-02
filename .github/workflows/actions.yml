@@ -75,10 +75,13 @@ jobs:
           run: echo "VERSION=${{ steps.version.outputs.version }}" >> $GITHUB_ENV
 
         - name: Install Make 
-          run: sudo apt-get update && sudo apt-get install make 
+          run: sudo apt-get update && sudo apt-get install make && pip install --upgrade pip
 
-        - name: Create env Virtual && Run Testes !!
-          run: make venv && make test
+        - name: Create Env Virtual
+          run: make venv
+
+        - name: Run Testes
+          run: make test
 
         - uses: mr-smithers-excellent/docker-build-push@v6
           name: Build & push Docker image
