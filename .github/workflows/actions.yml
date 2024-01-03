@@ -60,13 +60,13 @@ jobs:
           id: version_increment
           run: |
             if [[ "${{ steps.commit_message.outputs.commit_message }}" == "feat:"* ]]; then
-              echo "increment=minor" >> $GITHUB_ENV
+              echo "minor" >> $GITHUB_ENV
             elif [[ "${{ steps.commit_message.outputs.commit_message }}" == "fix:"* ]]; then
-              echo "increment=patch" >> $GITHUB_ENV
+              echo "patch" >> $GITHUB_ENV
             elif [[ "${{ steps.commit_message.outputs.commit_message }}" == "breaking:"* ]]; then
-              echo "increment=major" >> $GITHUB_ENV
+              echo "major" >> $GITHUB_ENV
             else
-              echo "increment=patch" >> $GITHUB_ENV
+              echo "patch" >> $GITHUB_ENV
             fi
 
 
@@ -75,7 +75,7 @@ jobs:
           id: version
           with:
             scheme: semver
-            increment: ${{ steps.version_increment.outputs.increment }}
+            increment: ${{ steps.version_increment.outputs }}
             #increment: major
 
         - name: Install Make 
