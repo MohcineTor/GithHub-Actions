@@ -94,9 +94,10 @@ jobs:
         - name: Build & push Docker image
           uses: mr-smithers-excellent/docker-build-push@v6
           with:
-            image: ${{ env.IMAGE_NAME }}:$VERSION  # Specify the image name and version
+            image: ${{ env.DOCKER_IMAGE_NAME }}:$VERSION  # Specify the image name and version
             tags: $VERSION
             registry: docker.io
+            dockerfile: ./build/
             username: ${{ env.REGISTRY_USER }}
             password: ${{ env.REGISTRY_PASS }}
 
