@@ -79,10 +79,7 @@ jobs:
         
         - name: clean up Env Virtual !
           run: make clean
-
-        - name: Create Env Virtual 
-          run: make venv
-
+          
         - name: Run Testes
           run: make test
 
