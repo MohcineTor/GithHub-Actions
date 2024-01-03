@@ -75,11 +75,8 @@ jobs:
           id: version
           with:
             scheme: semver
-            #increment: ${{ steps.version_increment.outputs.increment }}
-            increment: major
-
-        - name: Set output variable 
-          run: echo "VERSION=${{ steps.version.outputs.version }}" >> $GITHUB_ENV
+            increment: ${{ steps.version_increment.outputs.increment }}
+            #increment: major
 
         - name: Install Make 
           run: sudo apt-get update && sudo apt-get install make
@@ -95,7 +92,7 @@ jobs:
 
         - name: Build image
           run: |
-            docker build . --file build/Dockerfile --tag ${{ env.DOCKER_IMAGE_NAME }}:$VERSION
+            docker build . --file build/Dockerfile --tag ${{ env.DOCKER_IMAGE_NAME }}:${{ steps.version.outputs.version }}
         
         - name: Scan image
           uses: anchore/scan-action@v3
@@ -110,14 +107,14 @@ jobs:
 
         - name: Push images to registry 
           run: |
-            docker push ${{ env.DOCKER_IMAGE_NAME }}:$VERSION
+            docker push ${{ env.DOCKER_IMAGE_NAME }}:${{ steps.version.outputs.version }}
 
         - name: Deploy to server
           run: |
             echo "${{ env.REGISTRY_PASS }}" | docker login -u "${{ env.REGISTRY_USER }}" --password-stdin
             docker ps -aq | xargs -r docker stop || true
             docker ps -aq | xargs -r docker rm || true
-            docker run -d -p 5000:5000 "${{ env.DOCKER_IMAGE_NAME }}:$VERSION"
+            docker run -d -p 5000:5000 "${{ env.DOCKER_IMAGE_NAME }}:${{ steps.version.outputs.version }}"
             docker ps 
             sleep 10
             curl http://localhost:5000
