@@ -75,7 +75,8 @@ jobs:
           id: version
           with:
             scheme: semver
-            increment: ${{ steps.version_increment.outputs.increment }}
+            #increment: ${{ steps.version_increment.outputs.increment }}
+            increment: major
 
         - name: Set output variable 
           run: echo "VERSION=${{ steps.version.outputs.version }}" >> $GITHUB_ENV
@@ -94,12 +95,12 @@ jobs:
 
         - name: Build image
           run: |
-            docker build . --file build/Dockerfile --tag ${{ env.IMAGE_REG }}/${{ env.DOCKER_IMAGE_NAME }}:$VERSION
+            docker build . --file build/Dockerfile --tag ${{ env.DOCKER_IMAGE_NAME }}:$VERSION
         
         - name: Scan image
           uses: anchore/scan-action@v3
           with:
-            image: "${{ env.IMAGE_REG }}/${{ env.DOCKER_IMAGE_NAME }}:$VERSION"
+            image: "${{ env.IMAGE_REG }}/${{ env.DOCKER_IMAGE_NAME }}"
             fail-build: false
             severity-cutoff: high
 
@@ -108,9 +109,7 @@ jobs:
 
         - name: Push images to registry 
           run: |
-            IMAGE_ID=${{ env.IMAGE_REG }}/${{ env.DOCKER_IMAGE_NAME }}
-            docker tag image $IMAGE_ID:$VERSION
-            docker push $IMAGE_ID:$VERSION
+            docker push ${{ env.DOCKER_IMAGE_NAME }}:$VERSION
 
         - name: Deploy to server
           run: |
