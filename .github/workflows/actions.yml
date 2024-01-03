@@ -26,7 +26,8 @@ permissions:
 env:
   REGISTRY_USER: ${{ vars.DOCKER_USERNAME }}
   REGISTRY_PASS: ${{ secrets.DOCKER_PASSWORD }}
-  IMAGE_NAME: ${{ vars.IMAGE_NAME }}
+  DOCKER_IMAGE_NAME: ${{ vars.DOCKER_IMAGE_NAME}}
+
 
 
 #This will ensure that your workflow only runs on the latest commit for the main branch and will cancel any in-progress workflows running for the same branch or pull request.
@@ -55,14 +56,15 @@ jobs:
           id: version_increment
           run: |
             if [[ "${{ steps.commit_message.outputs.commit_message }}" == "feat:"* ]]; then
-              echo "::set-output name=increment::minor"
+              echo "increment=minor" >> $GITHUB_ENV
             elif [[ "${{ steps.commit_message.outputs.commit_message }}" == "fix:"* ]]; then
-              echo "::set-output name=increment::patch"
+              echo "increment=patch" >> $GITHUB_ENV
             elif [[ "${{ steps.commit_message.outputs.commit_message }}" == "breaking:"* ]]; then
-              echo "::set-output name=increment::major"
+              echo "increment=major" >> $GITHUB_ENV
             else
-              echo "::set-output name=increment::patch"
+              echo "increment=patch" >> $GITHUB_ENV
             fi
+
 
         - name: Get next version
           uses: reecetech/version-increment@2023.4.1
