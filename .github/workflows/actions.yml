@@ -73,7 +73,7 @@ jobs:
           id: version
           with:
             scheme: semver
-            increment: ${{ steps.version_increment.outputs }}
+            increment: ${{ steps.version_increment.outputs.increment }}
             #increment: major
 
         - name: Install Make 
