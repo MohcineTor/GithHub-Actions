@@ -79,7 +79,11 @@ jobs:
         
         - name: clean up Env Virtual !
           run: make clean
-          
+        
+        # - name : insrtall pytest 
+        #   run: |
+        #     python3 -m pip install -U pytest=6.2.2
+
         - name: Run Testes
           run: make test
 
