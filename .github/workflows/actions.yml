@@ -54,9 +54,9 @@ jobs:
           id: commit_message
           run: |
             commit_message=$(git log --format=%B -n 1 ${{ github.sha }})
-            if [[ "$commit_message" == "feat:"* ]]; then
+            if [[ $commit_message == "feat:"* ]]; then
               echo "increment=minor" >> $GITHUB_ENV
-            elif [[ "$commit_message" == "breaking:"* ]]; then
+            elif [[ $commit_message == "breaking:"* ]]; then
               echo "increment=major" >> $GITHUB_ENV
             else
               echo "increment=patch" >> $GITHUB_ENV
