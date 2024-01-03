@@ -82,10 +82,10 @@ jobs:
         - name: Install Make 
           run: sudo apt-get update && sudo apt-get install make
         
-        - name: clean up Env Virtual !
+        - name: clean up Env Virtual
           run: make clean
 
-        - name: venv up Env 
+        - name: venv up 
           run: make venv
 
         - name: Run Testes
