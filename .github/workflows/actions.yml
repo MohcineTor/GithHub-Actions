@@ -100,7 +100,7 @@ jobs:
         - name: Scan image
           uses: anchore/scan-action@v3
           with:
-            image: "${{ env.DOCKER_IMAGE_NAME }}:$VERSION"
+            image: "${{ env.DOCKER_IMAGE_NAME }}:1.0.0"
             fail-build: false
             severity-cutoff: high
             output-format: table
@@ -117,7 +117,7 @@ jobs:
             echo "${{ env.REGISTRY_PASS }}" | docker login -u "${{ env.REGISTRY_USER }}" --password-stdin
             docker ps -aq | xargs -r docker stop || true
             docker ps -aq | xargs -r docker rm || true
-            docker run -d -p 5000:5000 "${{ env.DOCKER_IMAGE_NAME }}:1.0.0"
+            docker run -d -p 5000:5000 "${{ env.DOCKER_IMAGE_NAME }}:$VERSION"
             docker ps 
             sleep 10
             curl http://localhost:5000
