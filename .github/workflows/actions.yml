@@ -50,44 +50,12 @@ jobs:
           with:
             python-version: ${{ env.PYTHON_VERSION }}
 
-        - name: Get commit message
-          id: commit_message
-          run: |
-            commit_message=$(git log --format=%B -n 1 ${{ github.sha }})
-            if [[ $commit_message == "feat:"* ]]; then
-              echo "increment=minor" >> $GITHUB_ENV
-            elif [[ $commit_message == "breaking:"* ]]; then
-              echo "increment=major" >> $GITHUB_ENV
-            else
-              echo "increment=patch" >> $GITHUB_ENV
-            fi
-
-        # - name: Determine version increment
-        #   id: version_increment
-        #   run: |
-        #     echo  $commit_message 
-        #     if [[ "$commit_message" == "feat:"* ]]; then
-        #       echo "increment=minor" >> $GITHUB_ENV
-        #     elif [[ "$commit_message" == "fix:"* ]]; then
-        #       echo "increment=patch" >> $GITHUB_ENV
-        #     elif [[ "$commit_message" == "breaking:"* ]]; then
-        #       echo "increment=major" >> $GITHUB_ENV
-        #     else
-        #       echo "increment=patch" >> $GITHUB_ENV
-        #     fi
-
-        - name: git name 
-          run: |
-            echo "${{ steps.version_increment.outputs.increment }}"
-
         - name: Get next version
           uses: reecetech/version-increment@2023.4.1
           id: version
           with:
             scheme: semver
-            increment: ${{ steps.version_increment.outputs.increment }}
-
-            #increment: major
+            increment: patch
 
         # - name: Install Make 
         #   run: sudo apt-get update && sudo apt-get install make
@@ -101,9 +69,10 @@ jobs:
         # - name: Run Testes
         #   run: make test
 
-        # - name: Build image
-        #   run: |
-        #     docker build . --file build/Dockerfile --tag ${{ env.DOCKER_IMAGE_NAME }}:${{ steps.version.outputs.version }}
+        - name: Build image
+          run: |
+            echo ${{ steps.version.outputs.version }}
+            docker build . --file build/Dockerfile --tag ${{ env.DOCKER_IMAGE_NAME }}:${{ steps.version.outputs.version }}
         
         # - name: Scan image
         #   uses: anchore/scan-action@v3
