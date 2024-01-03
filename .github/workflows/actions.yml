@@ -27,6 +27,7 @@ env:
   REGISTRY_USER: ${{ vars.DOCKER_USERNAME }}
   REGISTRY_PASS: ${{ secrets.DOCKER_PASSWORD }}
   DOCKER_IMAGE_NAME: ${{ vars.DOCKER_IMAGE_NAME}}
+  IMAGE_REG: ${{ vars.IMAGE_REG}}
 
 
 
@@ -91,15 +92,25 @@ jobs:
         - name: Run Testes
           run: make test
 
-        - name: Build & push Docker image
-          uses: mr-smithers-excellent/docker-build-push@v6
+        - name: Build image
+          run: |
+            docker build . --file build/Dockerfile --tag ${{ env.IMAGE_REG }}/${{ env.DOCKER_IMAGE_NAME }}:$VERSION
+        
+        - name: Scan image
+          uses: anchore/scan-action@v3
           with:
-            image: ${{ env.DOCKER_IMAGE_NAME }} # Specify the image name and version
-            tags: $VERSION
-            registry: docker.io
-            dockerfile: ./build/Dockerfile
-            username: ${{ env.REGISTRY_USER }}
-            password: ${{ env.REGISTRY_PASS }}
+            image: "${{ env.IMAGE_REG }}/${{ env.DOCKER_IMAGE_NAME }}:$VERSION"
+            fail-build: false
+            severity-cutoff: high
+
+        - name: Log into registry
+          run: echo "${{ env.REGISTRY_PASS }}" | docker login ${{ env.IMAGE_REG }} -u ${{ env.REGISTRY_USER }} --password-stdin
+
+        - name: Push images to registry 
+          run: |
+            IMAGE_ID=${{ env.IMAGE_REG }}/${{ env.DOCKER_IMAGE_NAME }}
+            docker tag image $IMAGE_ID:$VERSION
+            docker push $IMAGE_ID:$VERSION
 
         - name: Deploy to server
           run: |
@@ -110,18 +121,6 @@ jobs:
             docker ps 
             sleep 10
             curl http://localhost:5000
-        
-        - name: Debug Information
-          run: |
-            echo "DOCKER_IMAGE_NAME: ${{ env.DOCKER_IMAGE_NAME }}"
-            echo "VERSION: $VERSION"
-            docker images
-
-        - name: Scan image
-          uses: anchore/scan-action@v3
-          with:
-            image: "${{ env.DOCKER_IMAGE_NAME }}:$VERSION"
-            fail-build: false
 
         # - name: 🔎 Check IP
         #   run: |
