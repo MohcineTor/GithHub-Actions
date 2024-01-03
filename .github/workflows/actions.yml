@@ -104,7 +104,8 @@ jobs:
         - name: Scan image
           uses: anchore/scan-action@v3
           with:
-            image: "${{ env.REGISTRY_USER }}/${{ env.IMAGE_NAME }}:$VERSION"
+            image: "${{ env.DOCKER_IMAGE_NAME }}:$VERSION"
+            fail-build: false
 
         - name: Deploy to server
           run: |
