@@ -48,9 +48,12 @@ jobs:
           uses: actions/setup-python@v3
           with:
             python-version: ${{ env.PYTHON_VERSION }}
-        
+
         - name: Get commit message
-          run: echo "::set-output name=commit_message::$(git log --format=%B -n 1 ${{ github.sha }})"
+          id: commit_message
+          run: |
+            commit_message=$(git log --format=%B -n 1 ${{ github.sha }})
+            echo "commit_message=${commit_message}" >> $GITHUB_ENV
 
         - name: Determine version increment
           id: version_increment
@@ -88,10 +91,10 @@ jobs:
         - name: Run Testes
           run: make test
 
-        - uses: mr-smithers-excellent/docker-build-push@v6
-          name: Build & push Docker image
+        - name: Build & push Docker image
+          uses: mr-smithers-excellent/docker-build-push@v6
           with:
-            image: ${{ env.IMAGE_NAME }}
+            image: ${{ env.IMAGE_NAME }}:$VERSION  # Specify the image name and version
             tags: $VERSION
             registry: docker.io
             username: ${{ env.REGISTRY_USER }}
