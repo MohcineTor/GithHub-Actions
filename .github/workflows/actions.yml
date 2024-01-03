@@ -100,7 +100,7 @@ jobs:
         - name: Scan image
           uses: anchore/scan-action@v3
           with:
-            image: "${{ env.DOCKER_IMAGE_NAME }}:1.0.0"
+            image: ${{ env.DOCKER_IMAGE_NAME }}:$VERSION
             fail-build: false
             severity-cutoff: high
             output-format: table
