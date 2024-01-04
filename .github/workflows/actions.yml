@@ -8,7 +8,8 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-  
+
+  # Allowing manual triggering of the workflow with Python version selection
   workflow_dispatch:
     inputs:
       python-version:
@@ -23,13 +24,12 @@ on:
 permissions:
   contents: read
 
+# Defining environment variables for Docker registry and image details
 env:
   REGISTRY_USER: ${{ vars.DOCKER_USERNAME }}
   REGISTRY_PASS: ${{ secrets.DOCKER_PASSWORD }}
   DOCKER_IMAGE_NAME: ${{ vars.DOCKER_IMAGE_NAME}}
   IMAGE_REG: ${{ vars.IMAGE_REG}}
-
-
 
 #This will ensure that your workflow only runs on the latest commit for the main branch and will cancel any in-progress workflows running for the same branch or pull request.
 concurrency:
@@ -37,6 +37,7 @@ concurrency:
   cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
 
 jobs: 
+# Job for testing and building on Ubuntu
   test-and-build-ubuntu:
       runs-on: ubuntu-20.04
       env:
@@ -89,7 +90,7 @@ jobs:
           run: |
             docker push ${{ env.DOCKER_IMAGE_NAME }}:${{ steps.version.outputs.version }}
 
-        - name: 🚀 Deploy localy Web App
+        - name: 🚀 Deploy Locally Web App
           run: |
             docker ps -aq | xargs -r docker stop || true
             docker ps -aq | xargs -r docker rm || true
