@@ -82,6 +82,7 @@ jobs:
             severity-cutoff: medium # Optionally specify the minimum vulnerability severity to trigger a failure.Valid choices are "negligible", "low", "medium", "high" and "critical"
             output-format: table
             only-fixed: true
+            acs-report-enable: true
 
         - name: 💀 Login to the Registry
           run: echo "${{ env.REGISTRY_PASS }}" | docker login ${{ env.IMAGE_REG }} -u ${{ env.REGISTRY_USER }} --password-stdin
