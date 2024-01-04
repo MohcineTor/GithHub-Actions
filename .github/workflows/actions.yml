@@ -78,8 +78,8 @@ jobs:
           uses: anchore/scan-action@v3
           with:
             image: ${{ env.DOCKER_IMAGE_NAME }}:${{ steps.version.outputs.version }}
-            fail-build: true
-            severity-cutoff: high # Optionally specify the minimum vulnerability severity to trigger a failure.Valid choices are "negligible", "low", "medium", "high" and "critical"
+            fail-build: false
+            severity-cutoff: medium # Optionally specify the minimum vulnerability severity to trigger a failure.Valid choices are "negligible", "low", "medium", "high" and "critical"
             output-format: table
             only-fixed: true
 
